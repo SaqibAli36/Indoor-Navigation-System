@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            margin-top: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #f1f1f1;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background: white;
+            border: 1px solid #ddd;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        video {
+            width: 200px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 id="welcomeMessage">Welcome to the User Dashboard</h2>
+
+    <div class="tabs">
+        <div class="tab active" onclick="openTab('roomTab')">Rooms</div>
+        <div class="tab" onclick="openTab('timetableTab')">Timetable</div>
+        <div class="tab" onclick="openTab('examTab')">Exams</div>
+    </div>
+
+    <!-- Rooms Tab -->
+    <div id="roomTab" class="tab-content active">
+        <input type="text" id="roomSearch" onkeyup="filterTable('roomTable', 'roomSearch')" placeholder="Search Room Name">
+        <table id="roomTable">
+            <thead>
+                <tr>
+                    <th>Room ID</th>
+                    <th>Room Name</th>
+                    <th>Video</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td>{{ room.id }}</td>
+                    <td>{{ room.name }}</td>
+                    <td><video controls><source src="{{ url_for('static', filename='uploads/' ~ room.video) }}" type="video/mp4"></video></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Timetable Tab -->
+    <div id="timetableTab" class="tab-content">
+        <input type="text" id="timetableSearch" onkeyup="filterTable('timetableTable', 'timetableSearch')" placeholder="Search by Subject, Day or Teacher">
+        <table id="timetableTable">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Period</th>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                    <th>Room</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in timetable %}
+                <tr>
+                    <td>{{ entry.day }}</td>
+                    <td>{{ entry.period }}</td>
+                    <td>{{ entry.subject }}</td>
+                    <td>{{ entry.teacher }}</td>
+                    <td>{{ entry.room }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Exams Tab -->
+    <div id="examTab" class="tab-content">
+        <input type="text" id="examSearch" onkeyup="filterTable('examTable', 'examSearch')" placeholder="Search Exam Name or Subject">
+        <table id="examTable">
+            <thead>
+                <tr>
+                    <th>Exam Name</th>
+                    <th>Date</th>
+                    <th>Room</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exam in exams %}
+                <tr>
+                    <td>{{ exam.name }}</td>
+                    <td>{{ exam.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ exam.room }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function openTab(tabName) {
+        const tabs = document.getElementsByClassName("tab");
+        const contents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove("active");
+            contents[i].classList.remove("active");
+        }
+        document.querySelector(`.tab[onclick="openTab('${tabName}')"]`).classList.add("active");
+        document.getElementById(tabName).classList.add("active");
+    }
+
+    function filterTable(tableId, inputId) {
+        const input = document.getElementById(inputId);
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById(tableId);
+        const tr = table.getElementsByTagName("tr");
+        for (let i = 1; i < tr.length; i++) {
+            let text = tr[i].innerText.toLowerCase();
+            tr[i].style.display = text.includes(filter) ? "" : "none";
+        }
+    }
+
+    // Hide welcome message after 1 second
+    setTimeout(() => {
+        const welcome = document.getElementById('welcomeMessage');
+        if (welcome) {
+            welcome.style.display = 'none';
+        }
+    }, 1000);
+</script>
+</body>
+</html>

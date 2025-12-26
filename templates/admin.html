@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Admin Dashboard</title>
+    <style>
+        :root{
+            --neon-blue:#0ff0fc;
+            --neon-purple:#8a2be2;
+            --neon-green:#39ff14;
+            --dark-bg:#0a0a1f;
+            --card-bg: rgba(10,10,31,0.8);
+            --text: #ffffff;
+        }
+        body{
+            font-family: Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text);
+            margin:0;
+            padding:0;
+            background-image:
+              radial-gradient(circle at 10% 20%, rgba(255,42,109,0.08) 0%, transparent 20%),
+              radial-gradient(circle at 90% 70%, rgba(0,255,252,0.06) 0%, transparent 20%);
+        }
+        .container{
+            width: 80%;
+            margin: 28px auto;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius:10px;
+            box-shadow: 0 0 16px rgba(0,255,252,0.14);
+            border: 1px solid rgba(0,255,252,0.08);
+        }
+        h2,h3{ text-align:center; text-shadow:0 0 10px var(--neon-blue); margin:10px 0 18px; }
+        .top-buttons{ text-align:right; margin-bottom:10px; }
+        .top-buttons a, .top-buttons button{
+            color:var(--neon-green);
+            text-decoration:none;
+            background:none;
+            border:none;
+            font-size:1rem;
+            cursor:pointer;
+            margin-left:12px;
+        }
+        .top-buttons a:hover, .top-buttons button:hover{ text-shadow:0 0 8px var(--neon-green); }
+
+        .tabs{ display:flex; gap:8px; margin-bottom:16px; }
+        .tab{ background:#050511; padding:10px 16px; border-radius:6px 6px 0 0; cursor:pointer; color:var(--text); border:1px solid transparent; }
+        .tab.active{ border:1px solid var(--neon-blue); color:var(--neon-blue); box-shadow:0 0 8px var(--neon-blue); }
+        .tab-content{ display:none; padding:18px; border:1px solid rgba(0,255,252,0.08); border-top:none; border-radius:0 0 6px 6px; background:rgba(10,10,31,0.6); }
+        .tab-content.active{ display:block; }
+        .form-group{ margin-bottom:12px; }
+        label{ display:block; color:var(--neon-blue); margin-bottom:6px; font-weight:600; }
+        input[type="text"], input[type="date"], input[type="time"], select, input[type="file"]{
+            width:95%; padding:10px; border-radius:6px; border:1px solid rgba(0,255,252,0.12);
+            background:rgba(10,10,31,0.5); color:var(--text);
+        }
+
+        /* Neon white icons for date/time pickers */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) brightness(2);
+            cursor: pointer;
+        }
+
+        button{ padding:10px 16px; border:none; border-radius:6px; cursor:pointer; font-weight:700;
+            background: linear-gradient(45deg,var(--neon-blue),var(--neon-purple)); color:white;
+            box-shadow:0 0 12px rgba(0,255,252,0.15);
+        } 
+        table{ width:100%; border-collapse:collapse; margin-top:12px; }
+        th,td{ padding:10px 8px; border-bottom:1px solid rgba(0,255,252,0.06); text-align:left; vertical-align:middle; }
+        th{ color:var(--neon-blue); background:rgba(0,255,252,0.02); }
+        .video-container{ max-width:240px; }
+        .video-thumbnail{ width:100%; border-radius:6px; display:block; }
+        .search-box{ margin:12px 0; }
+        .search-box input{ width:40%; padding:8px; border-radius:6px; border:1px solid rgba(0,255,252,0.08); background:rgba(10,10,31,0.6); color:var(--text); }
+        .delete-form{ display:inline-block; margin:0; }
+        .small-link{ background:none; border:none; color:var(--neon-green); cursor:pointer; text-decoration:underline; padding:0; font-size:0.95rem; }
+        .alert{ padding:12px; margin-bottom:12px; border-radius:6px; }
+        .alert-success{ background: rgba(0,255,127,0.06); color:#00ff7f; border:1px solid rgba(0,255,127,0.12); }
+        .alert-danger{ background: rgba(255,42,109,0.06); color:#ff2a6d; border:1px solid rgba(255,42,109,0.12); }
+        @media (max-width:900px){
+            .container{ width:94%; padding:16px; }
+            .search-box input{ width:100%; }
+            .video-container{ max-width:160px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-buttons">
+            <a href="{{ url_for('logout') }}">Logout</a>
+            <button onclick="location.reload()">Refresh</button>
+        </div>
+        <h2>Welcome to the Admin Dashboard</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('rooms')">Rooms</div>
+            <div class="tab" onclick="openTab('timetable')">Timetable</div>
+            <div class="tab" onclick="openTab('exams')">Exams</div>
+        </div>
+
+        <!-- ROOMS -->
+        <div id="rooms" class="tab-content active">
+            <h3>Manage Rooms</h3>
+            <form action="{{ url_for('add_room') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group"><label for="id">Room ID</label><input type="text" id="id" name="id" required></div>
+                <div class="form-group"><label for="name">Room Name</label><input type="text" id="name" name="name" required></div>
+                <div class="form-group"><label for="video">Room Video (mp4)</label><input type="file" id="video" name="video" accept="video/*" required></div>
+                <button type="submit">Add Room</button>
+            </form>
+
+            <div class="search-box">
+                <input type="text" id="roomSearch" placeholder="Search by Room ID or Name..." onkeyup="searchTable('roomSearch','roomTable',[0,1])">
+            </div>
+
+            <table id="roomTable">
+                <thead>
+                    <tr><th>Room ID</th><th>Room Name</th><th>Video</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for room in rooms %}
+                    <tr>
+                        <td>{{ room.id }}</td>
+                        <td>{{ room.name }}</td>
+                        <td>
+                            <div class="video-container">
+                                <video class="video-thumbnail" controls>
+                                    <source src="{{ url_for('static', filename='uploads/' ~ room.video) }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </td>
+                        <td>
+                            <form class="delete-form" action="{{ url_for('delete_room', room_id=room.id) }}" method="POST" onsubmit="return confirm('Delete this room?');">
+                                <button class="small-link" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TIMETABLE -->
+        <div id="timetable" class="tab-content">
+            <h3>Manage Timetable</h3>
+            <form id="timetableForm" action="{{ url_for('add_timetable') }}" method="POST">
+                <div class="form-group">
+                    <label for="day">Day</label>
+                    <select id="day" name="day" required>
+                        <option value="">Select Day</option>
+                        <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="period">Period</label>
+                    <select id="period" name="period" required>
+                        <option value="">Select Period</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="subject">Subject</label><input type="text" id="subject" name="subject" required></div>
+                <div class="form-group"><label for="teacher">Teacher</label><input type="text" id="teacher" name="teacher" required></div>
+                <div class="form-group">
+                    <label for="room_select">Room</label>
+                    <select id="room_select" name="room" required>
+                        <option value="">Select Room</option>
+                        {% for room in rooms %}
+                          <option value="{{ room.name }}">{{ room.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group"><label for="start_time">Start Time</label><input type="time" id="start_time" name="start_time" required></div>
+                <div class="form-group"><label for="end_time">End Time</label><input type="time" id="end_time" name="end_time" required></div>
+
+                <button type="submit">Add Timetable Entry</button>
+            </form>
+
+            <div class="search-box">
+                <input type="text" id="timetableSearch" placeholder="Search by Subject or Teacher..." onkeyup="searchTable('timetableSearch','timetableTable',[2,3])">
+            </div>
+
+            <table id="timetableTable">
+                <thead><tr><th>Day</th><th>Period</th><th>Subject</th><th>Teacher</th><th>Room</th><th>Start</th><th>End</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for entry in timetable %}
+                    <tr>
+                        <td>{{ entry.day }}</td>
+                        <td>{{ entry.period }}</td>
+                        <td>{{ entry.subject }}</td>
+                        <td>{{ entry.teacher }}</td>
+                        <td>{{ entry.room }}</td>
+                        <td>{{ entry.start_time }}</td>
+                        <td>{{ entry.end_time }}</td>
+                        <td>
+                            <form class="delete-form" action="{{ url_for('delete_timetable', entry_id=entry.id) }}" method="POST" onsubmit="return confirm('Delete this timetable entry?');">
+                                <button class="small-link" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- EXAMS -->
+        <div id="exams" class="tab-content">
+            <h3>Manage Exams</h3>
+            <form id="examForm" action="{{ url_for('add_exam') }}" method="POST">
+                <div class="form-group"><label for="exam_name">Exam Name</label><input type="text" id="exam_name" name="exam_name" required></div>
+                <div class="form-group"><label for="exam_date">Exam Date</label><input type="date" id="exam_date" name="exam_date" required></div>
+                <div class="form-group"><label for="exam_start_time">Start Time</label><input type="time" id="exam_start_time" name="exam_start_time" required></div>
+                <div class="form-group"><label for="exam_end_time">End Time</label><input type="time" id="exam_end_time" name="exam_end_time" required></div>
+                <div class="form-group">
+                    <label for="exam_room">Exam Room</label>
+                    <select id="exam_room" name="exam_room" required>
+                        <option value="">Select Room</option>
+                        {% for room in rooms %}
+                          <option value="{{ room.name }}">{{ room.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit">Add Exam</button>
+            </form>
+
+            <div class="search-box">
+                <input type="text" id="examSearch" placeholder="Search by Exam Name, Date, Start Time or End Time..." onkeyup="searchTable('examSearch','examTable',[0,1,2,3])">
+            </div>
+
+            <table id="examTable">
+                <thead><tr><th>Exam Name</th><th>Date</th><th>Start</th><th>End</th><th>Room</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for exam in exams %}
+                    <tr>
+                        <td>{{ exam.name }}</td>
+                        <td>{{ exam.date }}</td>
+                        <td>{{ exam.start_time }}</td>
+                        <td>{{ exam.end_time }}</td>
+                        <td>{{ exam.room }}</td>
+                        <td>
+                            <form class="delete-form" action="{{ url_for('delete_exam', exam_id=exam.id) }}" method="POST" onsubmit="return confirm('Delete this exam?');">
+                                <button class="small-link" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+<script>
+    function openTab(tabId){
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const tabButtons = Array.from(document.querySelectorAll('.tab'));
+        const match = tabButtons.find(b => b.getAttribute('onclick') === `openTab('${tabId}')`);
+        if(match) match.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    function searchTable(inputId, tableId, searchCols){
+        const input = document.getElementById(inputId);
+        const filter = (input.value || '').toLowerCase();
+        const table = document.getElementById(tableId);
+        if(!table) return;
+        const rows = table.getElementsByTagName('tr');
+        for(let i=1; i<rows.length; i++){
+            const tds = rows[i].getElementsByTagName('td');
+            let matched = false;
+            for(const col of searchCols){
+                if(tds[col]){
+                    const txt = (tds[col].innerText || '').toLowerCase();
+                    if(txt.indexOf(filter) !== -1){ matched = true; break; }
+                }
+            }
+            rows[i].style.display = matched ? '' : 'none';
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+__pycache__/
+venv/
+.env
+*.pyc
+instance/
+node_modules/
+.firebase/
+credentials.json
+*firebase-adminsdk*.json
+static/uploads/
+*.mp4
