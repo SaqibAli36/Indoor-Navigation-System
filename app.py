@@ -179,6 +179,36 @@ def add_room():
     })
     flash('Room added successfully!', 'success')
     return redirect(url_for('admin'))
+# ---------------- EDIT ROOM ---------------- #
+@app.route('/edit_room/<room_id>', methods=['GET', 'POST'])
+@login_required
+def edit_room(room_id):
+    room_ref = db.collection("rooms").document(room_id).get()
+    if not room_ref.exists:
+        flash('Room not found!', 'danger')
+        return redirect(url_for('admin'))
+
+    room_data = room_ref.to_dict()
+
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        video = request.files.get('video')
+
+        if name:
+            # Update name
+            room_ref.reference.update({"name": name})
+
+        if video:
+            # Save new video
+            video_filename = secure_filename(f"room_{room_id}.mp4")
+            video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_filename)
+            video.save(video_path)
+            room_ref.reference.update({"video": video_filename})
+
+        flash('Room updated successfully!', 'success')
+        return redirect(url_for('admin'))
+
+    return render_template('edit_room.html', room=room_data, room_id=room_id)
 
 @app.route('/delete_room/<room_id>', methods=['POST'])
 @login_required
@@ -241,6 +271,46 @@ def add_timetable():
     flash('Timetable entry added!', 'success')
     return redirect(url_for('admin'))
 
+# ---------------- UTILITY FUNCTIONS ---------------- #
+def get_rooms():
+    """Fetch all rooms from Firestore and return as list of dicts."""
+    rooms_ref = db.collection("rooms").stream()
+    rooms = []
+    for room in rooms_ref:
+        d = room.to_dict()
+        rooms.append({
+            "id": room.id,
+            "name": d.get("name", ""),
+            "video": d.get("video", "")
+        })
+    return rooms
+
+@app.route('/edit_timetable/<entry_id>', methods=['GET', 'POST'])
+@login_required
+def edit_timetable(entry_id):
+    entry_ref = db.collection("timetable").document(entry_id)
+    entry_doc = entry_ref.get()
+    if not entry_doc.exists:
+        flash("Timetable entry not found!", "danger")
+        return redirect(url_for('admin'))
+    entry = entry_doc.to_dict()
+
+    if request.method == "POST":
+        updated_data = {
+            "day": request.form['day'],
+            "period": request.form['period'],
+            "subject": request.form['subject'],
+            "teacher": request.form['teacher'],
+            "room": request.form['room'],
+            "start_time": request.form['start_time'],
+            "end_time": request.form['end_time']
+        }
+        entry_ref.update(updated_data)
+        flash("Timetable updated successfully!", "success")
+        return redirect(url_for('admin'))
+
+    return render_template('edit_timetable.html', entry=entry, rooms=get_rooms(), entry_id=entry_id)
+
 @app.route('/delete_timetable/<entry_id>', methods=['POST'])
 @login_required
 def delete_timetable(entry_id):
@@ -293,6 +363,33 @@ def add_exam():
     })
     flash('Exam added!', 'success')
     return redirect(url_for('admin'))
+
+@app.route('/edit_exam/<exam_id>', methods=['GET', 'POST'])
+@login_required
+def edit_exam(exam_id):
+    exam_ref = db.collection("exams").document(exam_id)
+    exam_doc = exam_ref.get()
+
+    if not exam_doc.exists:
+        flash("Exam not found!", "danger")
+        return redirect(url_for('admin'))
+
+    exam = exam_doc.to_dict()
+
+    if request.method == "POST":
+        updated_data = {
+            "name": request.form['exam_name'],
+            "date": request.form['exam_date'],
+            "room": request.form['exam_room'],
+            "start_time": request.form['exam_start_time'],
+            "end_time": request.form['exam_end_time']
+        }
+        exam_ref.update(updated_data)
+        flash("Exam updated successfully!", "success")
+        return redirect(url_for('admin'))
+
+    # Pass exam data and rooms to template
+    return render_template('edit_exam.html', exam=exam, exam_id=exam_id, rooms=get_rooms())
 
 @app.route('/delete_exam/<exam_id>', methods=['POST'])
 @login_required
