@@ -108,6 +108,18 @@
             font-weight: bold;
             text-align: center;
         }
+        .flash-message {
+            text-align: center;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            background: rgba(10,10,31,0.7);
+            color: #0ff0fc;
+            border: 1px solid rgba(0,255,252,0.2);
+        }
+        .flash-message.success { color: #39ff14; border-color: #39ff14; }
+        .flash-message.danger { color: #ff2a6d; border-color: #ff2a6d; }
     </style>
     <script>
         function handleLogin(event) {
@@ -137,6 +149,16 @@
 
     <div class="container">
         <h2>Admin Login</h2>
+
+        <!-- Flask Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <form onsubmit="handleLogin(event)">
             <label>Email:</label>
             <input type="email" id="email" required>
