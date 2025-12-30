@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Exam</title>
+    <style>
+        :root{
+            --neon-blue:#0ff0fc;
+            --neon-purple:#8a2be2;
+            --neon-green:#39ff14;
+            --dark-bg:#0a0a1f;
+            --card-bg: rgba(10,10,31,0.8);
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 0 16px rgba(0,255,252,0.14);
+        }
+
+        h2 { 
+            text-align: center; 
+            text-shadow: 0 0 10px var(--neon-blue); 
+        }
+
+        label { 
+            display: block; 
+            margin: 6px 0 4px; 
+            color: var(--neon-blue); 
+            font-weight: 600; 
+        }
+
+        input, select {
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 12px; 
+            border-radius: 6px; 
+            border: 1px solid rgba(0,255,252,0.12); 
+            background: rgba(10,10,31,0.5); 
+            color: var(--text);
+        }
+
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            font-weight: 700; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            background: linear-gradient(45deg,var(--neon-blue),var(--neon-purple)); 
+            color: white; 
+        }
+
+        a { 
+            display: block; 
+            margin-top: 12px; 
+            text-align: center; 
+            color: var(--neon-green); 
+            text-decoration: none;
+        }
+
+        /* White icons for date/time pickers */
+        input[type="date"],
+        input[type="time"] {
+            color: var(--text);
+            background-color: rgba(10,10,31,0.5);
+            accent-color: var(--text);
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.8;
+        }
+
+        input[type="date"]::-moz-inner-spin-button,
+        input[type="time"]::-moz-inner-spin-button {
+            color: var(--text);
+        }
+
+        /* Hover effect for button */
+        button:hover {
+            box-shadow: 0 0 16px var(--neon-blue), 0 0 24px var(--neon-purple);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Exam</h2>
+        <form action="{{ url_for('edit_exam', exam_id=exam_id) }}" method="POST">
+            <label>Exam Name:</label>
+            <input type="text" name="exam_name" value="{{ exam.name }}" required>
+
+            <label>Exam Date:</label>
+            <input type="date" name="exam_date" value="{{ exam.date }}" required>
+
+            <label>Room:</label>
+            <select name="exam_room" required>
+                {% for room in rooms %}
+                <option value="{{ room.name }}" {% if exam.room==room.name %}selected{% endif %}>{{ room.name }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Start Time:</label>
+            <input type="time" name="exam_start_time" value="{{ exam.start_time }}" required>
+
+            <label>End Time:</label>
+            <input type="time" name="exam_end_time" value="{{ exam.end_time }}" required>
+
+            <button type="submit">Update Exam</button>
+        </form>
+        <a href="{{ url_for('admin') }}">Back to Admin</a>
+    </div>
+</body>
+</html>
