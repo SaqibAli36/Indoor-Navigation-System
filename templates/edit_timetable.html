@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Timetable Entry</title>
+    <style>
+        /* Use the same neon theme CSS from your admin dashboard */
+        :root{
+            --neon-blue:#0ff0fc;
+            --neon-purple:#8a2be2;
+            --neon-green:#39ff14;
+            --dark-bg:#0a0a1f;
+            --card-bg: rgba(10,10,31,0.8);
+            --text: #ffffff;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text);
+            margin: 0;
+        }
+        .container {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 0 16px rgba(0,255,252,0.14);
+        }
+        h2 { text-align: center; text-shadow: 0 0 10px var(--neon-blue); }
+        label { display: block; margin: 6px 0; color: var(--neon-blue); font-weight: 600; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid rgba(0,255,252,0.12); background: rgba(10,10,31,0.5); color: var(--text);}
+        button { width: 100%; padding: 10px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; background: linear-gradient(45deg,var(--neon-blue),var(--neon-purple)); color: white; }
+        a { display: block; margin-top: 12px; text-align: center; color: var(--neon-green); text-decoration: none;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Timetable Entry</h2>
+        <form action="{{ url_for('edit_timetable', entry_id=entry_id) }}" method="POST">
+            <label>Day:</label>
+            <select name="day" required>
+                <option value="Monday" {% if entry.day=='Monday' %}selected{% endif %}>Monday</option>
+                <option value="Tuesday" {% if entry.day=='Tuesday' %}selected{% endif %}>Tuesday</option>
+                <option value="Wednesday" {% if entry.day=='Wednesday' %}selected{% endif %}>Wednesday</option>
+                <option value="Thursday" {% if entry.day=='Thursday' %}selected{% endif %}>Thursday</option>
+                <option value="Friday" {% if entry.day=='Friday' %}selected{% endif %}>Friday</option>
+                <option value="Saturday" {% if entry.day=='Saturday' %}selected{% endif %}>Saturday</option>
+                <option value="Sunday" {% if entry.day=='Sunday' %}selected{% endif %}>Sunday</option>
+            </select>
+
+            <label>Period:</label>
+            <select name="period" required>
+                {% for i in range(1,7) %}
+                <option value="{{ i }}" {% if entry.period==i|string %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Subject:</label>
+            <input type="text" name="subject" value="{{ entry.subject }}" required>
+
+            <label>Teacher:</label>
+            <input type="text" name="teacher" value="{{ entry.teacher }}" required>
+
+            <label>Room:</label>
+            <select name="room" required>
+                {% for room in rooms %}
+                <option value="{{ room.name }}" {% if entry.room==room.name %}selected{% endif %}>{{ room.name }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Start Time:</label>
+            <input type="time" name="start_time" value="{{ entry.start_time }}" required>
+
+            <label>End Time:</label>
+            <input type="time" name="end_time" value="{{ entry.end_time }}" required>
+
+            <button type="submit">Update Entry</button>
+        </form>
+        <a href="{{ url_for('admin') }}">Back to Admin</a>
+    </div>
+</body>
+</html>
