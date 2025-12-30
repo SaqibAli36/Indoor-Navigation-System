@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Verified</title>
+
+    <style>
+        :root{
+            --neon-blue:#0ff0fc;
+            --neon-purple:#8a2be2;
+            --neon-green:#39ff14;
+            --dark-bg:#0a0a1f;
+            --card-bg: rgba(10,10,31,0.85);
+            --text:#ffffff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,255,252,0.2);
+        }
+
+        h1 {
+            margin-bottom: 16px;
+            text-shadow: 0 0 12px var(--neon-blue);
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+
+        a {
+            display: inline-block;
+            padding: 12px 26px;
+            background: linear-gradient(45deg,var(--neon-blue),var(--neon-purple));
+            color: #000;
+            font-weight: 700;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        a:hover {
+            background: var(--neon-green);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Email Verified</h1>
+        <p>Your email has been verified successfully. You may now log in to your account.</p>
+        <a href="{{ url_for('login') }}">Go to Login</a>
+    </div>
+
+</body>
+</html>
